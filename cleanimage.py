@@ -4,7 +4,7 @@ from PIL import Image
 import math
 import imagecleanup as xyz
 
-inputDir = "C:/temp/Train/"
+inputDir = "C:/temp/Train/SmallTrainSet/"
 
 def preProcessImage(fileName):
     global inputdir
@@ -12,18 +12,19 @@ def preProcessImage(fileName):
     # numpy.save(inputDir + "numpy/" + fileName + ".npy", csv)
     return csv
 
-
-
-
-
 def saveImage(na, filename):
     height = len(na)
-
-    img = Image.new('RGB', (height, height))
+    width = len(na[0])
+    img = Image.new('RGB', (height, width))
     #img = Image.fromarray(na)
+
+    maxval = xyz.findLumCenter(na)
+
     for x in range(height):
-        for y in range(height):
+        for y in range(width):
             greyscale = int(255 * float(na[x][y]))
+            greyscale = int((255.0/maxval) * (float(na[x][y])))
+
             color = (greyscale, greyscale, greyscale)
 
             if ( na[x][y] == -55):
@@ -38,7 +39,11 @@ imgcount = 0
 import time
 st = time.time()
 
-maximg = 300
+maximg = 500
+
+#debugimg = "1237645941824356443-i.csv"
+
+#img = preProcessImage(debugimg)
 
 for filename in os.listdir(inputDir):
     if filename.endswith(".csv"):
@@ -48,9 +53,13 @@ for filename in os.listdir(inputDir):
             img = preProcessImage(filename)
             #saveImage(img, filename)
 
-            img = xyz.cleanupImage(img)
+            xxxx = img.copy()
+
+            clean = xyz.cleanupImage(xxxx)
             #img = normalizeInt(img)
-            saveImage(img, filename + "xx")
+
+            combined = np.concatenate((img, clean), axis=0)
+            saveImage(combined, filename + "xx")
 
 
 end = time.time()
